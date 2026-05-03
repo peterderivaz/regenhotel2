@@ -25,6 +25,7 @@ window.Makyek.renderBoard = function renderBoard({
   analysisMoves = [],
   hoverMoves = [],
   regenChanges = [],
+  hiddenPlacedSquare = null,
   failurePrompt = "",
   onFailureClick,
 }) {
@@ -49,6 +50,7 @@ window.Makyek.renderBoard = function renderBoard({
       const canPlace = !inputBlocked && game.canPlaceAt && game.canPlaceAt(squarePosition);
       const isPlaced = game.isPlacedFilip && game.isPlacedFilip(squarePosition);
       const isRegenNew = regenChanges.some((change) => sameSquare(change.square, squarePosition));
+      const isHiddenPlaced = hiddenPlacedSquare && sameSquare(hiddenPlacedSquare, squarePosition);
 
       square.classList.toggle("place-target", canPlace);
       square.classList.toggle("placed-square", Boolean(isPlaced));
@@ -66,6 +68,7 @@ window.Makyek.renderBoard = function renderBoard({
           onSquareClick,
           isPlaced,
           isRegenNew,
+          isHiddenPlaced,
         ));
       }
 
@@ -83,6 +86,10 @@ window.Makyek.renderBoard = function renderBoard({
 
   if (failurePrompt) {
     boardElement.append(createFailurePrompt(failurePrompt, onFailureClick));
+  }
+
+  if (game.phase === "placing" && game.remainingPlacements > 0) {
+    boardElement.append(createFilipReserve(game.remainingPlacements));
   }
 };
 
@@ -139,6 +146,68 @@ window.Makyek.animateRegenStep = function animateRegenStep(boardElement, changes
     }, 1000);
   });
 };
+
+window.Makyek.getBoardPieceRect = function getBoardPieceRect(boardElement, square) {
+  return findSquare(boardElement, square)?.querySelector(".piece")?.getBoundingClientRect() || null;
+};
+
+window.Makyek.getReserveFilipRect = function getReserveFilipRect(boardElement) {
+  const reservePieces = boardElement.querySelectorAll(".reserve-filip");
+  const reservePiece = reservePieces[reservePieces.length - 1];
+
+  return reservePiece ? reservePiece.getBoundingClientRect() : null;
+};
+
+window.Makyek.animateFilipPlacement = function animateFilipPlacement(boardElement, fromRect, toRect) {
+  if (!fromRect || !toRect) {
+    return Promise.resolve();
+  }
+
+  const boardRect = boardElement.getBoundingClientRect();
+  const clone = document.createElement("img");
+
+  clone.className = "filip-placement-ghost";
+  clone.src = getPieceImage("light", true);
+  clone.alt = "";
+  clone.style.left = `${fromRect.left - boardRect.left}px`;
+  clone.style.top = `${fromRect.top - boardRect.top}px`;
+  clone.style.width = `${fromRect.width}px`;
+  clone.style.height = `${fromRect.height}px`;
+  boardElement.append(clone);
+
+  window.requestAnimationFrame(() => {
+    clone.style.left = `${toRect.left - boardRect.left}px`;
+    clone.style.top = `${toRect.top - boardRect.top}px`;
+    clone.style.width = `${toRect.width}px`;
+    clone.style.height = `${toRect.height}px`;
+  });
+
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      clone.remove();
+      resolve();
+    }, 360);
+  });
+};
+
+function createFilipReserve(remainingPlacements) {
+  const reserve = document.createElement("div");
+
+  reserve.className = "filip-reserve";
+  reserve.setAttribute("aria-label", `${remainingPlacements} Filips left to place`);
+
+  for (let index = 0; index < remainingPlacements; index += 1) {
+    const image = document.createElement("img");
+
+    image.className = "reserve-filip";
+    image.src = getPieceImage("light", true);
+    image.alt = "";
+    image.draggable = false;
+    reserve.append(image);
+  }
+
+  return reserve;
+}
 
 window.Makyek.animateAiMove = function animateAiMove(boardElement, move, capturedSquares = []) {
   const fromSquare = findSquare(boardElement, move.from);
@@ -206,10 +275,11 @@ function createPiece(
   onSquareClick,
   isPlaced,
   isRegenNew,
+  isHiddenPlaced,
 ) {
   const pieceElement = document.createElement("button");
   const pieceImage = document.createElement("img");
-  pieceElement.className = `piece ${piece}-piece${canMove ? " movable" : ""}${isPlaced ? " placed-piece" : ""}${isRegenNew ? " regen-piece" : ""}`;
+  pieceElement.className = `piece ${piece}-piece${canMove ? " movable" : ""}${isPlaced ? " placed-piece" : ""}${isRegenNew ? " regen-piece" : ""}${isHiddenPlaced ? " hidden-placement-piece" : ""}`;
   pieceElement.type = "button";
   pieceElement.draggable = canMove;
   pieceElement.disabled = !canMove && !(piece === "light" && isPlaced && onSquareClick);

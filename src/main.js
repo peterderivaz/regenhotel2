@@ -45,7 +45,7 @@ gameTitle.addEventListener("keydown", (event) => {
   toggleAdvancedControls();
 });
 
-function draw() {
+function draw(hiddenPlacedSquare = null) {
   boardElement.classList.remove("start-screen");
   window.Makyek.renderBoard({
     boardElement,
@@ -54,6 +54,7 @@ function draw() {
     inputBlocked: regenInProgress || levelComplete,
     analysisMoves,
     hoverMoves: hoveredMove ? [{ move: hoveredMove }] : [],
+    hiddenPlacedSquare,
     failurePrompt: game.phase === "failed" ? "Oh No!  Not all rooms are full - click to undo" : "",
     onSquareClick: handleBoardClick,
     onFailureClick: undoFailedRegen,
@@ -90,11 +91,27 @@ async function handleBoardClick(square) {
     return;
   }
 
+  const wasPlacedFilip = game.isPlacedFilip && game.isPlacedFilip(square);
+  const canPlaceFilip = game.canPlaceAt && game.canPlaceAt(square);
+  const animationFromRect = getPlacementAnimationSource(square, wasPlacedFilip, canPlaceFilip);
   const result = game.toggleFilip(square);
   statusElement.textContent = result.message;
-  draw();
+  draw(canPlaceFilip && result.ok ? square : null);
+
+  let placementAnimation = Promise.resolve();
+
+  if (result.ok && (wasPlacedFilip || canPlaceFilip)) {
+    const animationToRect = getPlacementAnimationTarget(square, wasPlacedFilip);
+    placementAnimation = window.Makyek.animateFilipPlacement(boardElement, animationFromRect, animationToRect)
+      .then(() => {
+        if (canPlaceFilip) {
+          draw();
+        }
+      });
+  }
 
   if (result.readyToRegen) {
+    await placementAnimation;
     await runRegen();
   }
 }
@@ -128,9 +145,39 @@ async function runRegen() {
 }
 
 function undoFailedRegen() {
+  const lastPlaced = game.placedFilips[game.placedFilips.length - 1];
+  const animationFromRect = lastPlaced
+    ? window.Makyek.getBoardPieceRect(boardElement, lastPlaced)
+    : null;
   const result = game.undoLastPlacement();
   statusElement.textContent = result.message;
   draw();
+
+  if (result.ok) {
+    window.Makyek.animateFilipPlacement(
+      boardElement,
+      animationFromRect,
+      window.Makyek.getReserveFilipRect(boardElement),
+    );
+  }
+}
+
+function getPlacementAnimationSource(square, wasPlacedFilip, canPlaceFilip) {
+  if (wasPlacedFilip) {
+    return window.Makyek.getBoardPieceRect(boardElement, square);
+  }
+
+  if (canPlaceFilip) {
+    return window.Makyek.getReserveFilipRect(boardElement);
+  }
+
+  return null;
+}
+
+function getPlacementAnimationTarget(square, wasPlacedFilip) {
+  return wasPlacedFilip
+    ? window.Makyek.getReserveFilipRect(boardElement)
+    : window.Makyek.getBoardPieceRect(boardElement, square);
 }
 
 resetButton.addEventListener("click", () => {
