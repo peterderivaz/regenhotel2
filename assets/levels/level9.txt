@@ -1,0 +1,9 @@
+The side rooms look tempting, but the floor needs a delayed chain.
+########
+#F#..###
+#g..F.##
+#.F.#.##
+#.....##
+########
+########
+place=3

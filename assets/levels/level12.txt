@@ -1,0 +1,9 @@
+Four Filips are enough, but only if the goblins turn in the right order.
+########
+#gF.#.##
+#.#...##
+#gF...##
+#Fg#..##
+########
+########
+place=4

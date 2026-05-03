@@ -1,0 +1,9 @@
+Two goblins block the obvious spread. Build a seed far from the crowd.
+########
+##.#..##
+##Fgg.##
+##....##
+##FF..##
+##....##
+########
+place=3

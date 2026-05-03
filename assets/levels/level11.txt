@@ -1,0 +1,9 @@
+The goblin column can help or ruin everything.
+########
+#..#..##
+#gF...##
+#gF...##
+#..g..##
+#F....##
+########
+place=3
