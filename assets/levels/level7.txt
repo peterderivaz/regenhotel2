@@ -1,9 +1,9 @@
-Two placements can wake up the whole floor.
+But goblins also regenerate if two are next to an empty square.
 ########
-##F  ###
+## g ###
+##g  ###
 ##   ###
-##  F###
 ########
 ########
 ########
-place=2
+place=3

@@ -1,8 +1,8 @@
-Turn the goblin first, then let the corridor fill.
+Goblins can be converted by two Filips.
 ########
 ########
-##F gF##
-##   ###
+### g ##
+########
 ########
 ########
 ########

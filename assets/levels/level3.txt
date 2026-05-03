@@ -1,8 +1,9 @@
-Put a Filip into the gap and the surrounded goblin will change.
+Filips can regenerate into gaps.
+Place Filips so all rooms are filled.
 ########
 ########
 ########
-##F gF##
+##F   F#
 ########
 ########
 ########

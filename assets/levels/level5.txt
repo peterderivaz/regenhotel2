@@ -1,9 +1,9 @@
-Make the small block fill itself.
-########
-########
-##F  ###
-##  F###
-########
-########
-########
-place=2
+Place Filips to fill all the rooms
+        
+        
+        
+        
+        
+        
+        
+place=8

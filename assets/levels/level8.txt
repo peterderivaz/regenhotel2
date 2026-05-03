@@ -1,9 +1,9 @@
-Final floor: convert the goblins and fill every open room.
+Fill all the rooms.
 ########
-##F gF##
-##    ##
-##F gF##
-########
-########
-########
-place=3
+ F      
+    F   
+        
+     F  
+        
+        
+place=4

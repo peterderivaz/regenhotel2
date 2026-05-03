@@ -1,9 +1,9 @@
-Place one Filip so the goblin has Filips on both sides.
+Place Filips in all the rooms.
 ########
 ########
-## gF###
+##    ##
 ########
 ########
 ########
 ########
-place=1
+place=4

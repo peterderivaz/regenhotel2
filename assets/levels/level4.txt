@@ -1,9 +1,10 @@
-Choose the rooms that make both gaps regenerate.
+Filip can regenerate between any 2 Filips.
+Place Filips to fill all the rooms.
 ########
 ########
-##F  F##
+##    ##
 ##    ##
 ########
 ########
 ########
-place=2
+place=3

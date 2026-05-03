@@ -1,9 +1,9 @@
-Place one Filip to start a line of new Filips.
+Place Filips to fill all the rooms.
+########
+## FF###
+##F  ###
+##  F###
 ########
 ########
-##F  F##
 ########
-########
-########
-########
-place=1
+place=5
