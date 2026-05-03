@@ -119,6 +119,45 @@ window.Makyek.createGame = function createGame(initialLevel = null) {
       };
     },
 
+    movePlacedFilip(from, to) {
+      if (phase !== "placing") {
+        return { ok: false, message: "Click to reset." };
+      }
+
+      if (!isInsideBoard(from) || !isInsideBoard(to)) {
+        return { ok: false, message: "Choose a hotel room." };
+      }
+
+      if (sameSquare(from, to)) {
+        return { ok: true, message: placementMessage(placeLimit - placedFilips.length) };
+      }
+
+      if (!placedFilips.some((placed) => sameSquare(placed, from))) {
+        return { ok: false, message: "Drag a placed Filip." };
+      }
+
+      if (originalFilips.has(squareKey(from))) {
+        return { ok: false, message: "Original Filips stay where they are." };
+      }
+
+      if (board[to.row][to.col]) {
+        return { ok: false, message: "That room is occupied." };
+      }
+
+      board[from.row][from.col] = null;
+      board[to.row][to.col] = "light";
+      placedFilips = placedFilips.map((placed) => (
+        sameSquare(placed, from)
+          ? { row: to.row, col: to.col }
+          : placed
+      ));
+
+      return {
+        ok: true,
+        message: placementMessage(placeLimit - placedFilips.length),
+      };
+    },
+
     getNextRegenStep() {
       if (phase !== "regen") {
         return null;

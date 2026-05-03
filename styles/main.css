@@ -599,7 +599,6 @@ button {
   align-items: start;
   gap: clamp(2px, 1.2vw, 10px);
   transform: translateX(-50%);
-  pointer-events: none;
 }
 
 .reserve-filip {
@@ -608,7 +607,11 @@ button {
   display: block;
   object-fit: contain;
   filter: drop-shadow(0 4px 7px rgba(25, 34, 31, 0.2));
-  pointer-events: none;
+  cursor: grab;
+}
+
+.reserve-filip.dragging {
+  opacity: 0.42;
 }
 
 .square.selected-square {

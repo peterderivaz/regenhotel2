@@ -24,6 +24,7 @@ window.Makyek.renderBoard = function renderBoard({
   onSquareClick,
   onMove,
   onMoveStart,
+  onReserveDragStart,
   inputBlocked,
   analysisMoves = [],
   hoverMoves = [],
@@ -98,7 +99,7 @@ window.Makyek.renderBoard = function renderBoard({
   }
 
   if (game.phase === "placing" && game.remainingPlacements > 0) {
-    boardElement.append(createFilipReserve(game.remainingPlacements));
+    boardElement.append(createFilipReserve(game.remainingPlacements, inputBlocked, onReserveDragStart));
   }
 };
 
@@ -265,7 +266,7 @@ window.Makyek.finishFilipPlacementAnimation = function finishFilipPlacementAnima
   return activeFilipPlacementAnimation.finishFast();
 };
 
-function createFilipReserve(remainingPlacements) {
+function createFilipReserve(remainingPlacements, inputBlocked, onReserveDragStart) {
   const reserve = document.createElement("div");
 
   reserve.className = "filip-reserve";
@@ -277,7 +278,27 @@ function createFilipReserve(remainingPlacements) {
     image.className = "reserve-filip";
     image.src = getPieceImage("light", true);
     image.alt = "";
-    image.draggable = false;
+    image.draggable = !inputBlocked;
+    image.addEventListener("dragstart", (event) => {
+      if (inputBlocked) {
+        event.preventDefault();
+        return;
+      }
+
+      event.dataTransfer.effectAllowed = "copy";
+      event.dataTransfer.setData("application/json", JSON.stringify({ source: "reserve" }));
+      draggedSquare = null;
+      image.classList.add("dragging");
+      if (onReserveDragStart) {
+        onReserveDragStart();
+      }
+    });
+    image.addEventListener("dragend", () => {
+      image.classList.remove("dragging");
+      draggedSquare = null;
+      clearLegalTargetHighlights(image.closest(".board"));
+      clearCapturePreview(image.closest(".board"));
+    });
     reserve.append(image);
   }
 
@@ -399,9 +420,10 @@ function createPiece(
 ) {
   const pieceElement = document.createElement("button");
   const pieceImage = document.createElement("img");
+  const canDragPlacedFilip = game.phase === "placing" && piece === "light" && isPlaced;
   pieceElement.className = `piece ${piece}-piece${canMove ? " movable" : ""}${isPlaced ? " placed-piece" : ""}${isRegenNew ? " regen-piece" : ""}${isHiddenPlaced ? " hidden-placement-piece" : ""}`;
   pieceElement.type = "button";
-  pieceElement.draggable = canMove;
+  pieceElement.draggable = canMove || canDragPlacedFilip;
   pieceElement.disabled = !canMove && !(piece === "light" && isPlaced && onSquareClick);
   pieceElement.dataset.row = row;
   pieceElement.dataset.col = col;
@@ -415,16 +437,20 @@ function createPiece(
   pieceElement.append(pieceImage);
 
   pieceElement.addEventListener("dragstart", (event) => {
-    if (!canMove) {
+    if (!canMove && !canDragPlacedFilip) {
       event.preventDefault();
       return;
     }
 
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("application/json", JSON.stringify({ row, col }));
+    event.dataTransfer.setData("application/json", JSON.stringify({
+      row,
+      col,
+      source: canDragPlacedFilip && !canMove ? "placed-filip" : "board",
+    }));
     draggedSquare = { row, col };
     pieceElement.classList.add("dragging");
-    if (piece === "light") {
+    if (piece === "light" && canMove) {
       highlightLegalTargets(pieceElement.closest(".board"), game, { row, col });
     }
     if (onMoveStart) {

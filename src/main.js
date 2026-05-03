@@ -67,8 +67,15 @@ function draw(hiddenPlacedSquare = null) {
     onSquareClick: handleBoardClick,
     onFailureClick: undoFailedRegen,
     onMoveStart: clearPonderPreview,
+    onReserveDragStart: clearPonderPreview,
     onMove: async (from, to) => {
       clearPonderPreview();
+
+      if (game.phase === "placing") {
+        await handlePlacementDrop(from, to);
+        return;
+      }
+
       const result = game.movePiece(from, to);
       statusElement.textContent = result.message;
       if (result.ok) {
@@ -87,6 +94,43 @@ function draw(hiddenPlacedSquare = null) {
     },
   });
 
+}
+
+async function handlePlacementDrop(from, to) {
+  await window.Makyek.finishFilipPlacementAnimation();
+
+  if (from?.source === "reserve") {
+    if (!game.canPlaceAt(to)) {
+      statusElement.textContent = game.board[to.row]?.[to.col] === "#"
+        ? "Choose a hotel room."
+        : "That room is occupied.";
+      return;
+    }
+
+    await handleBoardClick(to);
+    return;
+  }
+
+  if (from?.source !== "placed-filip") {
+    return;
+  }
+
+  const animationFromRect = window.Makyek.getBoardPieceRect(boardElement, from);
+  const result = game.movePlacedFilip(from, to);
+  statusElement.textContent = result.message;
+
+  if (!result.ok) {
+    draw();
+    return;
+  }
+
+  draw(to);
+  await window.Makyek.animateFilipPlacement(
+    boardElement,
+    animationFromRect,
+    window.Makyek.getBoardPieceRect(boardElement, to),
+  );
+  draw();
 }
 
 async function handleBoardClick(square) {
