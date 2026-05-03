@@ -1,5 +1,5 @@
 Filips can regenerate into gaps.
-Place Filips so all rooms are filled.
+Place Filip in the centre so all rooms are filled.
 ########
 ########
 ########

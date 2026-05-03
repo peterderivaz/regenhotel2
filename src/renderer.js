@@ -219,7 +219,7 @@ function createPiece(
   pieceElement.setAttribute("aria-label", `${piece} piece on ${renderSquareLabel(row, col)}`);
   pieceElement.title = `${piece} piece`;
   pieceImage.className = "piece-image";
-  pieceImage.src = getPieceImage(piece, false);
+  pieceImage.src = getPieceImage(piece, piece === "light" && isPlaced);
   pieceImage.alt = "";
   pieceImage.draggable = false;
   pieceElement.append(pieceImage);

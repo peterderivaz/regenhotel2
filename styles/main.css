@@ -540,12 +540,6 @@ button {
   pointer-events: none;
 }
 
-.square.placed-square {
-  border-radius: 8px;
-  outline: 2px solid rgba(240, 216, 121, 0.88);
-  outline-offset: -2px;
-}
-
 .square.regen-square::after {
   content: "";
   position: absolute;
@@ -643,7 +637,6 @@ button {
 
 .piece.placed-piece {
   cursor: pointer;
-  filter: drop-shadow(0 0 10px rgba(240, 216, 121, 0.95));
 }
 
 .piece.regen-piece {
