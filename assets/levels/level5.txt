@@ -1,10 +1,9 @@
-These goblins are dumb.
-Capture them all to win.
+Make the small block fill itself.
 ########
-F F  G G
-F F  G G
-F F  G G
-F F  G G
-F F  G G
 ########
-depth=1
+##F  ###
+##  F###
+########
+########
+########
+place=2

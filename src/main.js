@@ -29,6 +29,7 @@ let blackAnalysisDepth = null;
 let blackDebugSnapshot = null;
 let hoveredMove = null;
 let levelComplete = false;
+let regenInProgress = false;
 
 fillDepthSelect(aiDepthSelect);
 fillDepthSelect(ponderDepthSelect);
@@ -50,9 +51,10 @@ function draw() {
     boardElement,
     statusElement,
     game,
-    inputBlocked: isAiTurn() || levelComplete,
+    inputBlocked: regenInProgress || levelComplete,
     analysisMoves,
     hoverMoves: hoveredMove ? [{ move: hoveredMove }] : [],
+    onSquareClick: handleBoardClick,
     onMoveStart: clearPonderPreview,
     onMove: async (from, to) => {
       clearPonderPreview();
@@ -76,16 +78,64 @@ function draw() {
 
 }
 
+async function handleBoardClick(square) {
+  if (regenInProgress || levelComplete) {
+    return;
+  }
+
+  if (game.phase === "failed") {
+    const result = game.undoLastPlacement();
+    statusElement.textContent = result.message;
+    draw();
+    return;
+  }
+
+  const result = game.toggleFilip(square);
+  statusElement.textContent = result.message;
+  draw();
+
+  if (result.readyToRegen) {
+    await runRegen();
+  }
+}
+
+async function runRegen() {
+  regenInProgress = true;
+  clearPondering();
+  clearAiTimer();
+
+  let step = game.getNextRegenStep();
+
+  while (step) {
+    game.applyRegenStep(step);
+    draw();
+    await window.Makyek.animateRegenStep(boardElement, step.changes);
+    step = game.getNextRegenStep();
+  }
+
+  const result = game.finishRegen();
+  regenInProgress = false;
+  statusElement.textContent = result.message;
+
+  if (result.won) {
+    levelComplete = true;
+    draw();
+    await showNextLevelScreen();
+    return;
+  }
+
+  draw();
+}
+
 resetButton.addEventListener("click", () => {
   clearAiTimer();
   clearPondering();
   clearBlackDebugSnapshot();
   levelComplete = false;
+  regenInProgress = false;
   game.reset();
-  statusElement.textContent = game.helpText || "Board reset. Light to move.";
+  statusElement.textContent = game.helpText || placementStatus();
   draw();
-  scheduleAiMove();
-  schedulePondering();
 });
 
 levelSelect.addEventListener("change", async () => {
@@ -95,17 +145,13 @@ levelSelect.addEventListener("change", async () => {
 aiEnabledInput.addEventListener("change", () => {
   clearPondering();
   draw();
-  scheduleAiMove();
-  schedulePondering();
 });
 
-aiTypeSelect.addEventListener("change", scheduleAiMove);
-aiDepthSelect.addEventListener("change", scheduleAiMove);
+aiTypeSelect.addEventListener("change", () => {});
+aiDepthSelect.addEventListener("change", () => {});
 cacheEnabledInput.addEventListener("change", () => {
   clearPondering();
   draw();
-  scheduleAiMove();
-  schedulePondering();
 });
 moveListEnabledInput.addEventListener("change", () => {
   renderMoveList(analysisMoveScores[0] ? analysisMoveScores[0].depth : null);
@@ -113,17 +159,15 @@ moveListEnabledInput.addEventListener("change", () => {
 ponderEnabledInput.addEventListener("change", () => {
   clearPondering();
   draw();
-  schedulePondering();
 });
 ponderDepthSelect.addEventListener("change", () => {
   clearPondering();
   draw();
-  schedulePondering();
 });
 blackDebugButton.addEventListener("click", printBlackDebugSnapshot);
 
 function isAiTurn() {
-  return aiEnabledInput.checked && game.darkCanMove && game.currentPlayer === "dark" && !game.winner;
+  return false;
 }
 
 function scheduleAiMove() {
@@ -259,7 +303,7 @@ function schedulePondering() {
 }
 
 function shouldPonder() {
-  return ponderEnabledInput.checked && game.currentPlayer === "light" && !game.winner;
+  return false;
 }
 
 function clearPondering() {
@@ -570,6 +614,7 @@ async function showStartScreen() {
   const text = level.helpText || "";
 
   levelComplete = false;
+  regenInProgress = false;
   playAreaElement.classList.add("single-column");
   playAreaElement.classList.add("start-mode");
   gameHeaderElement.hidden = true;
@@ -634,6 +679,7 @@ async function showLevelIntroScreen(levelIndex) {
   const text = `${prefix}${level.helpText || ""}`;
 
   levelComplete = false;
+  regenInProgress = false;
   playAreaElement.classList.add("single-column");
   playAreaElement.classList.add("start-mode");
   gameHeaderElement.hidden = true;
@@ -724,6 +770,7 @@ async function loadSelectedLevel() {
   clearPondering();
   clearBlackDebugSnapshot();
   levelComplete = false;
+  regenInProgress = false;
   playAreaElement.classList.remove("start-mode");
   gameHeaderElement.hidden = false;
   controlsElement.hidden = false;
@@ -733,7 +780,7 @@ async function loadSelectedLevel() {
     const level = await window.Makyek.loadLevel(levelSelect.value);
     game.reset(level);
     setSelectValue(aiDepthSelect, level.aiDepth || 2);
-    statusElement.textContent = level.helpText || "Level loaded. Light to move.";
+    statusElement.textContent = level.helpText || placementStatus();
   } catch (error) {
     game.reset(null);
     setSelectValue(aiDepthSelect, 2);
@@ -741,8 +788,6 @@ async function loadSelectedLevel() {
   }
 
   draw();
-  scheduleAiMove();
-  schedulePondering();
 }
 
 function setSelectValue(selectElement, value) {
@@ -756,6 +801,11 @@ function setSelectValue(selectElement, value) {
   }
 
   selectElement.value = stringValue;
+}
+
+function placementStatus() {
+  const remaining = game.remainingPlacements;
+  return `${remaining} ${remaining === 1 ? "Filip" : "Filips"} left to place.`;
 }
 
 showStartScreen();

@@ -1,6 +1,6 @@
-# Mak-yek
+# Regen Hotel
 
-A browser-based Mak-yek game built with plain HTML, CSS, JavaScript, and image assets.
+A browser-based placement and regeneration puzzle game built with plain HTML, CSS, JavaScript, and image assets.
 
 ## Running
 

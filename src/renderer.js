@@ -18,11 +18,13 @@ window.Makyek.renderBoard = function renderBoard({
   boardElement,
   statusElement,
   game,
+  onSquareClick,
   onMove,
   onMoveStart,
   inputBlocked,
   analysisMoves = [],
   hoverMoves = [],
+  regenChanges = [],
 }) {
   selectedSquare = null;
   boardElement.replaceChildren();
@@ -41,11 +43,28 @@ window.Makyek.renderBoard = function renderBoard({
         continue;
       }
 
-      const canMove = !inputBlocked && piece && game.canMoveFrom({ row, col });
-      addSquareHandlers(square, onMove, inputBlocked, game);
+      const squarePosition = { row, col };
+      const canPlace = !inputBlocked && game.canPlaceAt && game.canPlaceAt(squarePosition);
+      const isPlaced = game.isPlacedFilip && game.isPlacedFilip(squarePosition);
+      const isRegenNew = regenChanges.some((change) => sameSquare(change.square, squarePosition));
+
+      square.classList.toggle("place-target", canPlace);
+      square.classList.toggle("placed-square", Boolean(isPlaced));
+      addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick);
 
       if (piece) {
-        square.append(createPiece(piece, row, col, statusElement, canMove, onMoveStart, game));
+        square.append(createPiece(
+          piece,
+          row,
+          col,
+          statusElement,
+          false,
+          onMoveStart,
+          game,
+          onSquareClick,
+          isPlaced,
+          isRegenNew,
+        ));
       }
 
       boardElement.append(square);
@@ -59,6 +78,45 @@ window.Makyek.renderBoard = function renderBoard({
   if (hoverMoves.length > 0) {
     boardElement.append(createMoveArrows(hoverMoves, "move-arrows hover-arrows"));
   }
+};
+
+window.Makyek.animateRegenStep = function animateRegenStep(boardElement, changes = []) {
+  changes.forEach((change) => {
+    const square = findSquare(boardElement, change.square);
+    const piece = square ? square.querySelector(".piece") : null;
+    const image = piece ? piece.querySelector(".piece-image") : null;
+
+    if (!square || !piece || !image) {
+      return;
+    }
+
+    square.classList.add("regen-square");
+    piece.classList.add("regen-piece");
+    image.src = getPieceImage(change.to, true);
+  });
+
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+      changes.forEach((change) => {
+        const square = findSquare(boardElement, change.square);
+        const piece = square ? square.querySelector(".piece") : null;
+        const image = piece ? piece.querySelector(".piece-image") : null;
+
+        if (image) {
+          image.src = getPieceImage(change.to, false);
+        }
+
+        if (piece) {
+          piece.classList.remove("regen-piece");
+        }
+
+        if (square) {
+          square.classList.remove("regen-square");
+        }
+      });
+      resolve();
+    }, 1000);
+  });
 };
 
 window.Makyek.animateAiMove = function animateAiMove(boardElement, move, capturedSquares = []) {
@@ -116,13 +174,24 @@ function createSquare(row, col, viewport) {
   return square;
 }
 
-function createPiece(piece, row, col, statusElement, canMove, onMoveStart, game) {
+function createPiece(
+  piece,
+  row,
+  col,
+  statusElement,
+  canMove,
+  onMoveStart,
+  game,
+  onSquareClick,
+  isPlaced,
+  isRegenNew,
+) {
   const pieceElement = document.createElement("button");
   const pieceImage = document.createElement("img");
-  pieceElement.className = `piece ${piece}-piece${canMove ? " movable" : ""}`;
+  pieceElement.className = `piece ${piece}-piece${canMove ? " movable" : ""}${isPlaced ? " placed-piece" : ""}${isRegenNew ? " regen-piece" : ""}`;
   pieceElement.type = "button";
   pieceElement.draggable = canMove;
-  pieceElement.disabled = !canMove;
+  pieceElement.disabled = !canMove && !(piece === "light" && isPlaced && onSquareClick);
   pieceElement.dataset.row = row;
   pieceElement.dataset.col = col;
   pieceElement.dataset.player = piece;
@@ -173,6 +242,12 @@ function createPiece(piece, row, col, statusElement, canMove, onMoveStart, game)
   });
 
   pieceElement.addEventListener("click", (event) => {
+    if (onSquareClick && piece === "light" && isPlaced) {
+      event.stopPropagation();
+      onSquareClick({ row, col });
+      return;
+    }
+
     if (piece !== "light" || !canMove) {
       return;
     }
@@ -197,7 +272,7 @@ function getPieceImage(piece, isCaptured) {
   return `assets/images/${imageName}`;
 }
 
-function addSquareHandlers(square, onMove, inputBlocked, game) {
+function addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick) {
   square.addEventListener("dragover", (event) => {
     if (inputBlocked) {
       return;
@@ -236,6 +311,14 @@ function addSquareHandlers(square, onMove, inputBlocked, game) {
   });
 
   square.addEventListener("click", () => {
+    if (onSquareClick && !inputBlocked) {
+      onSquareClick({
+        row: Number(square.dataset.row),
+        col: Number(square.dataset.col),
+      });
+      return;
+    }
+
     if (inputBlocked || !selectedSquare) {
       return;
     }

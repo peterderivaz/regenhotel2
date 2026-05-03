@@ -1,9 +1,9 @@
-Capture all the goblins to finish the level.
+Place one Filip to start a line of new Filips.
 ########
-##   F##
-##    ##
-##gg g##
-##    ##
-##g   ##
 ########
-depth=3
+##F  F##
+########
+########
+########
+########
+place=1

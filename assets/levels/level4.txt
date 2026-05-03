@@ -1,9 +1,9 @@
-Watch out! This goblin runs away.  Trap him between Filips.
+Choose the rooms that make both gaps regenerate.
 ########
 ########
-#F F   #
-#     F#
-#F  G  #
+##F  F##
+##    ##
 ########
 ########
-depth=4
+########
+place=2

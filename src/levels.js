@@ -44,6 +44,7 @@ window.Makyek.parseLevel = function parseLevel(source, name = "level") {
     helpText,
     board,
     aiDepth: parseLevelDepth(settingLines, name),
+    placeLimit: parsePlaceLimit(settingLines, board),
     darkCanMove: gridLines.some((line) => line.includes("G")),
   };
 };
@@ -82,4 +83,24 @@ function parseLevelDepth(lines, name) {
   }
 
   return depth;
+}
+
+function parsePlaceLimit(lines, board) {
+  const placeLine = lines.find((line) => line.trim().startsWith("place="));
+
+  if (placeLine) {
+    const limit = Number(placeLine.split("=")[1]);
+
+    if (Number.isInteger(limit) && limit >= 0) {
+      return limit;
+    }
+  }
+
+  const activeRows = board.filter((row) => row.some((cell) => cell !== "#")).length || window.Makyek.BOARD_ROWS;
+  const activeCols = Math.max(
+    0,
+    ...board.map((row) => row.filter((cell) => cell !== "#").length),
+  ) || window.Makyek.BOARD_COLS;
+
+  return Math.floor((activeRows + activeCols) / 2);
 }

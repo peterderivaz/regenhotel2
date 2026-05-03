@@ -1,9 +1,9 @@
-Use duplicated Filips to capture rows of goblins.
+Put a Filip into the gap and the surrounded goblin will change.
 ########
 ########
 ########
-#     F#
-#Fgggg #
-#Fgggg #
+##F gF##
 ########
-depth=3
+########
+########
+place=1

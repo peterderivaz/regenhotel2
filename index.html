@@ -32,12 +32,12 @@
             Reset
           </button>
 
-          <label class="toggle-control advanced-control">
+          <label class="toggle-control advanced-control" hidden>
             <input id="ai-enabled" type="checkbox" checked>
             <span>Black AI</span>
           </label>
 
-          <label class="field-control advanced-control">
+          <label class="field-control advanced-control" hidden>
             <span>AI type</span>
             <select id="ai-type">
               <option value="minimax">Minimax</option>
@@ -46,36 +46,36 @@
             </select>
           </label>
 
-          <label class="field-control advanced-control">
+          <label class="field-control advanced-control" hidden>
             <span>Depth</span>
             <select id="ai-depth">
               <option value="2" selected>2 ply</option>
             </select>
           </label>
 
-          <label class="toggle-control advanced-control">
+          <label class="toggle-control advanced-control" hidden>
             <input id="ponder-enabled" type="checkbox">
             <span>Think on White</span>
           </label>
 
-          <label class="field-control advanced-control">
+          <label class="field-control advanced-control" hidden>
             <span>Think limit</span>
             <select id="ponder-depth">
               <option value="2" selected>2 ply</option>
             </select>
           </label>
 
-          <label class="toggle-control advanced-control">
+          <label class="toggle-control advanced-control" hidden>
             <input id="cache-enabled" type="checkbox" checked>
             <span>Minimax cache</span>
           </label>
 
-          <label class="toggle-control advanced-control">
+          <label class="toggle-control advanced-control" hidden>
             <input id="move-list-enabled" type="checkbox">
             <span>Move scores</span>
           </label>
 
-          <button id="black-debug-print" class="icon-button advanced-control" type="button">
+          <button id="black-debug-print" class="icon-button advanced-control" type="button" hidden>
             Black debug
           </button>
 
@@ -86,7 +86,7 @@
         </div>
 
         <div class="play-area">
-          <div id="board" class="board" aria-label="8 by 7 Mak-yek board"></div>
+          <div id="board" class="board" aria-label="Regen Hotel board"></div>
           <aside id="move-list" class="move-list hidden" aria-label="White thinking move scores"></aside>
         </div>
       </section>

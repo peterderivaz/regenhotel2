@@ -1,10 +1,9 @@
-These goblins are smart.
-Capture them all to win.
-F F  G G
-F F  G G
-F F  G G
-F F  G G
-F F  G G
-F F  G G
-F F  G G
-depth=4
+Final floor: convert the goblins and fill every open room.
+########
+##F gF##
+##    ##
+##F gF##
+########
+########
+########
+place=3

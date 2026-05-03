@@ -1,9 +1,9 @@
-Goblins have entered the hotel!
-Drag Filip between the goblins to capture them.
+Place one Filip so the goblin has Filips on both sides.
 ########
-##F   ##
-##    ##
-## g g##
+########
+## gF###
 ########
 ########
 ########
+########
+place=1

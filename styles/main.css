@@ -503,6 +503,38 @@ button {
   outline-offset: -2px;
 }
 
+.square.place-target {
+  cursor: pointer;
+}
+
+.square.place-target::before {
+  content: "";
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid rgba(248, 250, 246, 0.78);
+  background: rgba(47, 127, 145, 0.24);
+  box-shadow: 0 0 14px rgba(240, 216, 121, 0.7);
+  pointer-events: none;
+}
+
+.square.placed-square {
+  border-radius: 8px;
+  outline: 2px solid rgba(240, 216, 121, 0.88);
+  outline-offset: -2px;
+}
+
+.square.regen-square::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border: 3px solid rgba(113, 232, 142, 0.9);
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  animation: regen-ring 1000ms ease-out forwards;
+}
+
 .square.selected-square {
   border-radius: 8px;
   outline: 2px solid rgba(248, 250, 246, 0.86);
@@ -587,6 +619,15 @@ button {
   filter: drop-shadow(0 0 8px rgba(240, 216, 121, 0.9));
 }
 
+.piece.placed-piece {
+  cursor: pointer;
+  filter: drop-shadow(0 0 10px rgba(240, 216, 121, 0.95));
+}
+
+.piece.regen-piece {
+  animation: regen-piece 1000ms ease-out forwards;
+}
+
 .piece.capture-preview-piece {
   filter: drop-shadow(0 0 10px rgba(217, 75, 61, 0.9));
 }
@@ -637,6 +678,37 @@ button {
 }
 
 @keyframes capture-ring {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.65);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes regen-piece {
+  0% {
+    filter: brightness(1.45) saturate(1.35);
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  42% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+
+  100% {
+    filter: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes regen-ring {
   0% {
     opacity: 0.95;
     transform: scale(0.65);
