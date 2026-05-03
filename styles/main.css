@@ -387,6 +387,28 @@ button {
   background: rgba(25, 34, 31, 0.72);
 }
 
+.level-failed-prompt {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 5vw, 40px);
+  border: 0;
+  color: #ffffff;
+  background: rgba(13, 17, 16, 0.58);
+  font-size: clamp(1.25rem, 3.8vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.18;
+  text-align: center;
+  cursor: pointer;
+}
+
+.level-failed-prompt:hover,
+.level-failed-prompt:focus-visible {
+  background: rgba(13, 17, 16, 0.68);
+}
+
 .play-area {
   width: 100%;
   display: grid;

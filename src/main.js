@@ -54,7 +54,9 @@ function draw() {
     inputBlocked: regenInProgress || levelComplete,
     analysisMoves,
     hoverMoves: hoveredMove ? [{ move: hoveredMove }] : [],
+    failurePrompt: game.phase === "failed" ? "Oh No!  Not all rooms are full - click to undo" : "",
     onSquareClick: handleBoardClick,
+    onFailureClick: undoFailedRegen,
     onMoveStart: clearPonderPreview,
     onMove: async (from, to) => {
       clearPonderPreview();
@@ -84,9 +86,7 @@ async function handleBoardClick(square) {
   }
 
   if (game.phase === "failed") {
-    const result = game.undoLastPlacement();
-    statusElement.textContent = result.message;
-    draw();
+    undoFailedRegen();
     return;
   }
 
@@ -124,6 +124,12 @@ async function runRegen() {
     return;
   }
 
+  draw();
+}
+
+function undoFailedRegen() {
+  const result = game.undoLastPlacement();
+  statusElement.textContent = result.message;
   draw();
 }
 

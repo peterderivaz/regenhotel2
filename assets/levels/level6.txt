@@ -1,7 +1,7 @@
 Goblins can be converted by two Filips.
 ########
 ########
-### g ##
+###.g.##
 ########
 ########
 ########

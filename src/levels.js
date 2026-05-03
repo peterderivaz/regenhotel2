@@ -50,7 +50,7 @@ window.Makyek.parseLevel = function parseLevel(source, name = "level") {
 };
 
 function isGridLine(line) {
-  return /^[# FgG]+$/.test(line);
+  return /^[#. FgG]+$/.test(line);
 }
 
 function parseLevelCell(cell) {
@@ -64,6 +64,10 @@ function parseLevelCell(cell) {
 
   if (cell === "g" || cell === "G") {
     return "dark";
+  }
+
+  if (cell === "." || cell === " ") {
+    return null;
   }
 
   return null;

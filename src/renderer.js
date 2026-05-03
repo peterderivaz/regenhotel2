@@ -25,6 +25,8 @@ window.Makyek.renderBoard = function renderBoard({
   analysisMoves = [],
   hoverMoves = [],
   regenChanges = [],
+  failurePrompt = "",
+  onFailureClick,
 }) {
   selectedSquare = null;
   boardElement.replaceChildren();
@@ -78,7 +80,26 @@ window.Makyek.renderBoard = function renderBoard({
   if (hoverMoves.length > 0) {
     boardElement.append(createMoveArrows(hoverMoves, "move-arrows hover-arrows"));
   }
+
+  if (failurePrompt) {
+    boardElement.append(createFailurePrompt(failurePrompt, onFailureClick));
+  }
 };
+
+function createFailurePrompt(text, onFailureClick) {
+  const button = document.createElement("button");
+
+  button.className = "level-failed-prompt";
+  button.type = "button";
+  button.textContent = text;
+  button.addEventListener("click", () => {
+    if (onFailureClick) {
+      onFailureClick();
+    }
+  });
+
+  return button;
+}
 
 window.Makyek.animateRegenStep = function animateRegenStep(boardElement, changes = []) {
   changes.forEach((change) => {
