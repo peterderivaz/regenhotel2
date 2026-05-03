@@ -1,0 +1,9 @@
+Watch out! This goblin runs away.  Trap him between Filips.
+########
+########
+#F F   #
+#     F#
+#F  G  #
+########
+########
+depth=4

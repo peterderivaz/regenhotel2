@@ -1,0 +1,9 @@
+Capture all the goblins to finish the level.
+########
+##   F##
+##    ##
+##gg g##
+##    ##
+##g   ##
+########
+depth=3

@@ -1,0 +1,10 @@
+These goblins are more aggressive.
+Capture them all to win.
+F F  G G
+F F  G G
+F F  G G
+F F  G G
+F F  G G
+F F  G G
+F F  G G
+depth=3

@@ -1,0 +1,9 @@
+Use duplicated Filips to capture rows of goblins.
+########
+########
+########
+#     F#
+#Fgggg #
+#Fgggg #
+########
+depth=3

@@ -1,0 +1,9 @@
+Goblins have entered the hotel!
+Drag Filip between the goblins to capture them.
+########
+##F   ##
+##    ##
+## g g##
+########
+########
+########

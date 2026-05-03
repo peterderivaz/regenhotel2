@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Regen Hotel</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script defer src="src/rules.js"></script>
+    <script defer src="src/levels.js"></script>
+    <script defer src="src/game.js"></script>
+    <script defer src="src/renderer.js"></script>
+    <script defer src="src/ai.js"></script>
+    <script defer src="src/main.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="game-layout" aria-label="Regen Hotel">
+        <header class="game-header">
+          <div>
+            <h1 id="game-title" role="button" tabindex="0" aria-label="Game options" aria-controls="game-controls" aria-expanded="false"></h1>
+            <p id="status" class="status">Drag a piece to an empty square.</p>
+          </div>
+        </header>
+
+        <div id="game-controls" class="controls advanced-collapsed" aria-label="Game options">
+          <label class="field-control">
+            <span>Level</span>
+            <select id="level-select"></select>
+          </label>
+
+          <button id="reset-board" class="icon-button" type="button" title="Reset board" aria-label="Reset board">
+            Reset
+          </button>
+
+          <label class="toggle-control advanced-control">
+            <input id="ai-enabled" type="checkbox" checked>
+            <span>Black AI</span>
+          </label>
+
+          <label class="field-control advanced-control">
+            <span>AI type</span>
+            <select id="ai-type">
+              <option value="minimax">Minimax</option>
+              <option value="greedy">Greedy captures</option>
+              <option value="random">Random</option>
+            </select>
+          </label>
+
+          <label class="field-control advanced-control">
+            <span>Depth</span>
+            <select id="ai-depth">
+              <option value="2" selected>2 ply</option>
+            </select>
+          </label>
+
+          <label class="toggle-control advanced-control">
+            <input id="ponder-enabled" type="checkbox">
+            <span>Think on White</span>
+          </label>
+
+          <label class="field-control advanced-control">
+            <span>Think limit</span>
+            <select id="ponder-depth">
+              <option value="2" selected>2 ply</option>
+            </select>
+          </label>
+
+          <label class="toggle-control advanced-control">
+            <input id="cache-enabled" type="checkbox" checked>
+            <span>Minimax cache</span>
+          </label>
+
+          <label class="toggle-control advanced-control">
+            <input id="move-list-enabled" type="checkbox">
+            <span>Move scores</span>
+          </label>
+
+          <button id="black-debug-print" class="icon-button advanced-control" type="button">
+            Black debug
+          </button>
+
+          <label class="field-control debug-output-control advanced-control" hidden>
+            <span>Black debug output</span>
+            <textarea id="black-debug-output" readonly rows="8"></textarea>
+          </label>
+        </div>
+
+        <div class="play-area">
+          <div id="board" class="board" aria-label="8 by 7 Mak-yek board"></div>
+          <aside id="move-list" class="move-list hidden" aria-label="White thinking move scores"></aside>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
