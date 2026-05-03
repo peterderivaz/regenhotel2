@@ -2,6 +2,7 @@ const boardElement = document.querySelector("#board");
 const playAreaElement = document.querySelector(".play-area");
 const statusElement = document.querySelector("#status");
 const gameHeaderElement = document.querySelector(".game-header");
+const gameLayoutElement = document.querySelector(".game-layout");
 const gameTitle = document.querySelector("#game-title");
 const controlsElement = document.querySelector("#game-controls");
 const resetButton = document.querySelector("#reset-board");
@@ -35,6 +36,13 @@ fillDepthSelect(aiDepthSelect);
 fillDepthSelect(ponderDepthSelect);
 fillLevelSelect(levelSelect);
 
+gameHeaderElement.addEventListener("click", (event) => {
+  if (event.target.closest("#game-title")) {
+    return;
+  }
+
+  toggleBannerCompact();
+});
 gameTitle.addEventListener("click", toggleAdvancedControls);
 gameTitle.addEventListener("keydown", (event) => {
   if (event.key !== "Enter" && event.key !== " ") {
@@ -825,6 +833,12 @@ function loadLevelByIndex(levelIndex) {
 function toggleAdvancedControls() {
   const isCollapsed = controlsElement.classList.toggle("advanced-collapsed");
   gameTitle.setAttribute("aria-expanded", String(!isCollapsed));
+}
+
+function toggleBannerCompact() {
+  const isCompact = gameHeaderElement.classList.toggle("banner-compact");
+
+  gameLayoutElement.classList.toggle("banner-compact", isCompact);
 }
 
 async function loadSelectedLevel() {

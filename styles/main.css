@@ -53,6 +53,10 @@ button {
   justify-items: center;
 }
 
+.game-layout.banner-compact {
+  --board-vertical-chrome: 356px;
+}
+
 .game-header {
   width: min(100%, var(--board-width));
   aspect-ratio: 45 / 16;
@@ -66,6 +70,12 @@ button {
   background-repeat: no-repeat;
   background-size: 100% auto;
   box-shadow: 0 10px 28px rgba(25, 34, 31, 0.14);
+  cursor: pointer;
+  transition:
+    height 240ms ease,
+    margin-bottom 240ms ease,
+    aspect-ratio 240ms ease,
+    background-size 240ms ease;
 }
 
 .game-header h1 {
@@ -84,6 +94,12 @@ button {
 
 .game-header.transition-hidden {
   opacity: 0;
+}
+
+.game-header.banner-compact {
+  height: 40px;
+  aspect-ratio: auto;
+  margin-bottom: 10px;
 }
 
 .status {

@@ -1,5 +1,6 @@
 Filip can regenerate between any 2 Filips.
 Place Filips to fill all the rooms.
+Drag to rearrange Filips.
 ########
 ########
 ##    ##
