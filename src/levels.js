@@ -6,6 +6,7 @@ window.Makyek.LEVEL_FILES = [
   "level3.txt",
   "level4.txt",
   "level5.txt",
+  "level5b.txt",
   "level6.txt",
   "level7.txt",
   "level8.txt",

@@ -46,6 +46,12 @@ window.Makyek.renderBoard = function renderBoard({
       const piece = game.board[row][col];
 
       if (piece === "#") {
+        const blockedSquare = createBlockedSquareLayer(row, col, currentViewport);
+
+        if (blockedSquare) {
+          boardElement.append(blockedSquare);
+        }
+
         continue;
       }
 
@@ -342,6 +348,40 @@ function createSquare(row, col, viewport) {
   square.setAttribute("role", "gridcell");
   square.setAttribute("aria-label", renderSquareLabel(row, col));
   return square;
+}
+
+function createBlockedSquareLayer(row, col, viewport) {
+  const rect = squareViewportRect(row, col, viewport);
+
+  if (!rect || rect.right < 0 || rect.left > 100 || rect.bottom < 0 || rect.top > 100) {
+    return null;
+  }
+
+  const layer = document.createElement("div");
+  const top = Math.max(0, rect.top);
+  const right = Math.max(0, 100 - rect.right);
+  const bottom = Math.max(0, 100 - rect.bottom);
+  const left = Math.max(0, rect.left);
+
+  layer.className = "blocked-square-layer";
+  layer.style.clipPath = `inset(${top}% ${right}% ${bottom}% ${left}%)`;
+  layer.setAttribute("aria-hidden", "true");
+
+  return layer;
+}
+
+function squareViewportRect(row, col, viewport) {
+  const centerX = viewportCoordinate(HOTEL_BOARD_COLUMNS[col], viewport.left, viewport.width);
+  const centerY = viewportCoordinate(HOTEL_BOARD_ROWS[row], viewport.top, viewport.height);
+  const width = 9.2 * (100 / viewport.width);
+  const height = 10.5 * (100 / viewport.height);
+
+  return {
+    left: centerX - width / 2,
+    right: centerX + width / 2,
+    top: centerY - height / 2,
+    bottom: centerY + height / 2,
+  };
 }
 
 function createPiece(

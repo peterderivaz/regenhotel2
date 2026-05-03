@@ -520,6 +520,24 @@ button {
   background: transparent;
 }
 
+.blocked-square-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("../assets/images/hotel_blocked.png");
+  background-position: var(--hotel-bg-x, 50%) var(--hotel-bg-y, 50%);
+  background-repeat: no-repeat;
+  background-size: var(--hotel-bg-width, 100%) var(--hotel-bg-height, 100%);
+  pointer-events: none;
+}
+
+.blocked-square-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(25, 18, 28, 0.4);
+}
+
 .square.drop-target {
   border-radius: 8px;
   background: rgba(240, 216, 121, 0.32);
