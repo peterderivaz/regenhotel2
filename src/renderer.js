@@ -3,9 +3,12 @@ window.Makyek = window.Makyek || {};
 const HOTEL_BOARD_COLUMNS = [7.6, 18.5, 29.8, 41.0, 58.8, 70.4, 81.9, 93.0];
 const HOTEL_BOARD_ROWS = [9.4, 23.3, 37.5, 51.6, 65.6, 79.2, 91.4];
 const FULL_BOARD_VIEWPORT = { left: 0, top: 0, width: 100, height: 100 };
+const FILIP_PLACEMENT_DURATION_MS = 480;
+const FILIP_PLACEMENT_FAST_DURATION_MS = 90;
 let currentViewport = FULL_BOARD_VIEWPORT;
 let draggedSquare = null;
 let selectedSquare = null;
+let activeFilipPlacementAnimation = null;
 
 ["light", "dark"].forEach((piece) => {
   [false, true].forEach((isCaptured) => {
@@ -151,9 +154,25 @@ window.Makyek.getBoardPieceRect = function getBoardPieceRect(boardElement, squar
   return findSquare(boardElement, square)?.querySelector(".piece")?.getBoundingClientRect() || null;
 };
 
-window.Makyek.getReserveFilipRect = function getReserveFilipRect(boardElement) {
-  const reservePieces = boardElement.querySelectorAll(".reserve-filip");
-  const reservePiece = reservePieces[reservePieces.length - 1];
+window.Makyek.getBoardSquareRect = function getBoardSquareRect(boardElement, square) {
+  return findSquare(boardElement, square)?.getBoundingClientRect() || null;
+};
+
+window.Makyek.getReserveFilipRect = function getReserveFilipRect(boardElement, targetRect = null) {
+  const reservePieces = [...boardElement.querySelectorAll(".reserve-filip")];
+
+  if (reservePieces.length === 0) {
+    return null;
+  }
+
+  const reservePiece = targetRect
+    ? reservePieces.reduce((closestPiece, piece) => (
+        rectDistanceSquared(piece.getBoundingClientRect(), targetRect) <
+          rectDistanceSquared(closestPiece.getBoundingClientRect(), targetRect)
+          ? piece
+          : closestPiece
+      ), reservePieces[0])
+    : reservePieces[reservePieces.length - 1];
 
   return reservePiece ? reservePiece.getBoundingClientRect() : null;
 };
@@ -163,8 +182,13 @@ window.Makyek.animateFilipPlacement = function animateFilipPlacement(boardElemen
     return Promise.resolve();
   }
 
+  window.Makyek.finishFilipPlacementAnimation();
+
   const boardRect = boardElement.getBoundingClientRect();
   const clone = document.createElement("img");
+  let timeoutId = null;
+  let isSettled = false;
+  let resolveAnimation = null;
 
   clone.className = "filip-placement-ghost";
   clone.src = getPieceImage("light", true);
@@ -175,19 +199,64 @@ window.Makyek.animateFilipPlacement = function animateFilipPlacement(boardElemen
   clone.style.height = `${fromRect.height}px`;
   boardElement.append(clone);
 
-  window.requestAnimationFrame(() => {
+  function settle() {
+    if (isSettled) {
+      return;
+    }
+
+    isSettled = true;
+    window.clearTimeout(timeoutId);
+    clone.remove();
+
+    if (activeFilipPlacementAnimation?.clone === clone) {
+      activeFilipPlacementAnimation = null;
+    }
+
+    if (resolveAnimation) {
+      resolveAnimation();
+    }
+  }
+
+  function moveToEnd(durationMs) {
+    clone.style.transitionDuration = `${durationMs}ms`;
     clone.style.left = `${toRect.left - boardRect.left}px`;
     clone.style.top = `${toRect.top - boardRect.top}px`;
     clone.style.width = `${toRect.width}px`;
     clone.style.height = `${toRect.height}px`;
+  }
+
+  const promise = new Promise((resolve) => {
+    resolveAnimation = resolve;
+    timeoutId = window.setTimeout(settle, FILIP_PLACEMENT_DURATION_MS + 60);
   });
 
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      clone.remove();
-      resolve();
-    }, 360);
+  activeFilipPlacementAnimation = {
+    clone,
+    finishFast() {
+      if (isSettled) {
+        return promise;
+      }
+
+      moveToEnd(FILIP_PLACEMENT_FAST_DURATION_MS);
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(settle, FILIP_PLACEMENT_FAST_DURATION_MS + 20);
+      return promise;
+    },
+  };
+
+  window.requestAnimationFrame(() => {
+    moveToEnd(FILIP_PLACEMENT_DURATION_MS);
   });
+
+  return promise;
+};
+
+window.Makyek.finishFilipPlacementAnimation = function finishFilipPlacementAnimation() {
+  if (!activeFilipPlacementAnimation) {
+    return Promise.resolve();
+  }
+
+  return activeFilipPlacementAnimation.finishFast();
 };
 
 function createFilipReserve(remainingPlacements) {
@@ -207,6 +276,17 @@ function createFilipReserve(remainingPlacements) {
   }
 
   return reserve;
+}
+
+function rectDistanceSquared(firstRect, secondRect) {
+  const firstCenterX = firstRect.left + firstRect.width / 2;
+  const firstCenterY = firstRect.top + firstRect.height / 2;
+  const secondCenterX = secondRect.left + secondRect.width / 2;
+  const secondCenterY = secondRect.top + secondRect.height / 2;
+  const deltaX = firstCenterX - secondCenterX;
+  const deltaY = firstCenterY - secondCenterY;
+
+  return deltaX * deltaX + deltaY * deltaY;
 }
 
 window.Makyek.animateAiMove = function animateAiMove(boardElement, move, capturedSquares = []) {

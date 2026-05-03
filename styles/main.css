@@ -1,10 +1,10 @@
 :root {
   color-scheme: light;
   --board-width: 720px;
-  --board-vertical-chrome: 430px;
+  --board-vertical-chrome: 474px;
   --poster-vertical-chrome: 52px;
   --side-panel-width: 280px;
-  --reserve-height: 54px;
+  --reserve-height: 88px;
   --page: #eef2ed;
   --ink: #19221f;
   --muted: #5a6863;
@@ -696,10 +696,10 @@ button {
   object-fit: contain;
   pointer-events: none;
   transition:
-    left 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    top 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    width 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    height 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    left 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .square.capture-square::after {
@@ -842,7 +842,7 @@ button {
     width: min(
       100%,
       var(--board-width),
-      max(0px, calc((100dvh - 214px) * var(--board-fit-ratio, 1) - 8px))
+      max(0px, calc((100dvh - 258px) * var(--board-fit-ratio, 1) - 8px))
     );
   }
 

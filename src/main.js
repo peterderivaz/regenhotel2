@@ -86,8 +86,10 @@ async function handleBoardClick(square) {
     return;
   }
 
+  await window.Makyek.finishFilipPlacementAnimation();
+
   if (game.phase === "failed") {
-    undoFailedRegen();
+    await undoFailedRegen();
     return;
   }
 
@@ -144,7 +146,9 @@ async function runRegen() {
   draw();
 }
 
-function undoFailedRegen() {
+async function undoFailedRegen() {
+  await window.Makyek.finishFilipPlacementAnimation();
+
   const lastPlaced = game.placedFilips[game.placedFilips.length - 1];
   const animationFromRect = lastPlaced
     ? window.Makyek.getBoardPieceRect(boardElement, lastPlaced)
@@ -157,7 +161,7 @@ function undoFailedRegen() {
     window.Makyek.animateFilipPlacement(
       boardElement,
       animationFromRect,
-      window.Makyek.getReserveFilipRect(boardElement),
+      window.Makyek.getReserveFilipRect(boardElement, animationFromRect),
     );
   }
 }
@@ -168,16 +172,21 @@ function getPlacementAnimationSource(square, wasPlacedFilip, canPlaceFilip) {
   }
 
   if (canPlaceFilip) {
-    return window.Makyek.getReserveFilipRect(boardElement);
+    return window.Makyek.getReserveFilipRect(
+      boardElement,
+      window.Makyek.getBoardSquareRect(boardElement, square),
+    );
   }
 
   return null;
 }
 
 function getPlacementAnimationTarget(square, wasPlacedFilip) {
+  const sourceRect = window.Makyek.getBoardPieceRect(boardElement, square);
+
   return wasPlacedFilip
-    ? window.Makyek.getReserveFilipRect(boardElement)
-    : window.Makyek.getBoardPieceRect(boardElement, square);
+    ? window.Makyek.getReserveFilipRect(boardElement, sourceRect)
+    : sourceRect;
 }
 
 resetButton.addEventListener("click", () => {
