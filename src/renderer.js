@@ -41,6 +41,10 @@ window.Makyek.renderBoard = function renderBoard({
   currentViewport = getBoardViewport(game.board, boardRows, boardCols);
   applyBoardViewport(boardElement, currentViewport);
 
+  const percolationPreview = game.getFilipPercolationPreview
+    ? game.getFilipPercolationPreview()
+    : [];
+
   for (let row = 0; row < boardRows; row += 1) {
     for (let col = 0; col < boardCols; col += 1) {
       const square = createSquare(row, col, currentViewport);
@@ -61,9 +65,13 @@ window.Makyek.renderBoard = function renderBoard({
       const isPlaced = game.isPlacedFilip && game.isPlacedFilip(squarePosition);
       const isRegenNew = regenChanges.some((change) => sameSquare(change.square, squarePosition));
       const isHiddenPlaced = hiddenPlacedSquare && sameSquare(hiddenPlacedSquare, squarePosition);
+      const isPercolationPreview = percolationPreview.some((previewSquare) => (
+        sameSquare(previewSquare, squarePosition)
+      ));
 
       square.classList.toggle("place-target", canPlace);
       square.classList.toggle("placed-square", Boolean(isPlaced));
+      square.classList.toggle("percolation-preview-square", isPercolationPreview);
       addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick);
 
       if (piece) {
@@ -287,7 +295,7 @@ function createFilipReserve(remainingPlacements, inputBlocked, onReserveDragStar
 
       event.dataTransfer.effectAllowed = "copy";
       event.dataTransfer.setData("application/json", JSON.stringify({ source: "reserve" }));
-      draggedSquare = null;
+      draggedSquare = { source: "reserve" };
       image.classList.add("dragging");
       if (onReserveDragStart) {
         onReserveDragStart();
@@ -298,6 +306,7 @@ function createFilipReserve(remainingPlacements, inputBlocked, onReserveDragStar
       draggedSquare = null;
       clearLegalTargetHighlights(image.closest(".board"));
       clearCapturePreview(image.closest(".board"));
+      clearPercolationPreview(image.closest(".board"));
     });
     reserve.append(image);
   }
@@ -448,7 +457,11 @@ function createPiece(
       col,
       source: canDragPlacedFilip && !canMove ? "placed-filip" : "board",
     }));
-    draggedSquare = { row, col };
+    draggedSquare = {
+      row,
+      col,
+      source: canDragPlacedFilip && !canMove ? "placed-filip" : "board",
+    };
     pieceElement.classList.add("dragging");
     if (piece === "light" && canMove) {
       highlightLegalTargets(pieceElement.closest(".board"), game, { row, col });
@@ -464,6 +477,7 @@ function createPiece(
     draggedSquare = null;
     clearLegalTargetHighlights(pieceElement.closest(".board"));
     clearCapturePreview(pieceElement.closest(".board"));
+    clearPercolationPreview(pieceElement.closest(".board"));
   });
 
   pieceElement.addEventListener("focus", () => {
@@ -518,12 +532,15 @@ function addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick) {
     event.preventDefault();
     square.classList.add("drop-target");
     clearCapturePreview(square.parentElement);
+    clearPercolationPreview(square.parentElement);
+    previewPercolation(square, game, draggedSquare);
     previewCaptures(square, game, draggedSquare);
   });
 
   square.addEventListener("dragleave", () => {
     square.classList.remove("drop-target");
     clearCapturePreview(square.parentElement);
+    clearPercolationPreview(square.parentElement);
   });
 
   square.addEventListener("drop", (event) => {
@@ -535,6 +552,7 @@ function addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick) {
     square.classList.remove("drop-target");
     clearLegalTargetHighlights(square.parentElement);
     clearCapturePreview(square.parentElement);
+    clearPercolationPreview(square.parentElement);
 
     const from = readDragData(event);
     const to = {
@@ -649,6 +667,36 @@ function clearCapturePreview(boardElement) {
     }
 
     pieceElement.classList.remove("capture-preview-piece");
+  });
+}
+
+function previewPercolation(square, game, from) {
+  if (!game.getFilipPercolationPreview || game.phase !== "placing") {
+    return;
+  }
+
+  const to = {
+    row: Number(square.dataset.row),
+    col: Number(square.dataset.col),
+  };
+  const previewSquares = game.getFilipPercolationPreview({
+    source: from?.source,
+    from,
+    to,
+  });
+
+  previewSquares.forEach((previewSquare) => {
+    findSquare(square.parentElement, previewSquare)?.classList.add("percolation-drag-preview-square");
+  });
+}
+
+function clearPercolationPreview(boardElement) {
+  if (!boardElement) {
+    return;
+  }
+
+  boardElement.querySelectorAll(".percolation-drag-preview-square").forEach((square) => {
+    square.classList.remove("percolation-drag-preview-square");
   });
 }
 

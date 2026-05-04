@@ -70,6 +70,20 @@ window.Makyek.createGame = function createGame(initialLevel = null) {
       return originalFilips.has(squareKey(square));
     },
 
+    getFilipPercolationPreview(placement = null) {
+      if (phase !== "placing") {
+        return [];
+      }
+
+      const previewBoard = getPlacementPreviewBoard(board, placedFilips, placeLimit, placement);
+
+      if (!previewBoard) {
+        return [];
+      }
+
+      return getFilipPercolationPreview(previewBoard);
+    },
+
     toggleFilip(square) {
       if (phase !== "placing") {
         return { ok: false, message: "Click to reset." };
@@ -269,6 +283,79 @@ function getNextRegenStep(board) {
   });
 
   return changes.length > 0 ? { changes } : null;
+}
+
+function getPlacementPreviewBoard(board, placedFilips, placeLimit, placement) {
+  const previewBoard = cloneBoard(board);
+  const to = placement?.to;
+
+  if (!placement || !to) {
+    return previewBoard;
+  }
+
+  if (!isInsideBoard(to) || previewBoard[to.row][to.col] === "#") {
+    return null;
+  }
+
+  if (placement.source === "reserve") {
+    if (placedFilips.length >= placeLimit || previewBoard[to.row][to.col]) {
+      return null;
+    }
+
+    previewBoard[to.row][to.col] = "light";
+    return previewBoard;
+  }
+
+  if (placement.source !== "placed-filip" || !isInsideBoard(placement.from)) {
+    return null;
+  }
+
+  if (!placedFilips.some((placed) => sameSquare(placed, placement.from))) {
+    return null;
+  }
+
+  if (sameSquare(placement.from, to)) {
+    return previewBoard;
+  }
+
+  if (previewBoard[to.row][to.col]) {
+    return null;
+  }
+
+  previewBoard[placement.from.row][placement.from.col] = null;
+  previewBoard[to.row][to.col] = "light";
+  return previewBoard;
+}
+
+function getFilipPercolationPreview(board) {
+  const previewSquares = new Map();
+  const startingBoard = cloneBoard(board);
+  const previewBoard = cloneBoard(board);
+  const maxSteps = window.Makyek.BOARD_ROWS * window.Makyek.BOARD_COLS;
+
+  for (let stepIndex = 0; stepIndex < maxSteps; stepIndex += 1) {
+    const step = getNextRegenStep(previewBoard);
+
+    if (!step) {
+      break;
+    }
+
+    step.changes.forEach((change) => {
+      previewBoard[change.square.row][change.square.col] = change.to;
+
+      if (
+        change.to === "light" &&
+        startingBoard[change.square.row][change.square.col] !== "light"
+      ) {
+        previewSquares.set(squareKey(change.square), {
+          row: change.square.row,
+          col: change.square.col,
+        });
+      }
+    });
+  }
+
+  return [...previewSquares.values()];
 }
 
 function countAdjacentPieces(board, square) {
