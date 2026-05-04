@@ -53,6 +53,46 @@ gameTitle.addEventListener("keydown", (event) => {
   toggleAdvancedControls();
 });
 
+window.Makyek.setStatusText = setStatusText;
+
+function setHelpText(text) {
+  statusElement.dataset.helpText = text || "";
+  renderStatusText();
+}
+
+function setStatusText(text) {
+  statusElement.dataset.statusText = text || "";
+  renderStatusText();
+}
+
+function renderStatusText() {
+  const helpText = statusElement.dataset.helpText || "";
+  const statusText = statusElement.dataset.statusText || "";
+  const lines = [];
+
+  if (helpText) {
+    lines.push(createStatusLine("status-help", helpText));
+  }
+
+  if (statusText && statusText !== helpText) {
+    lines.push(createStatusLine("status-current", statusText));
+  }
+
+  if (lines.length === 0) {
+    lines.push(createStatusLine("status-current", ""));
+  }
+
+  statusElement.replaceChildren(...lines);
+}
+
+function createStatusLine(className, text) {
+  const line = document.createElement("span");
+
+  line.className = className;
+  line.textContent = text;
+  return line;
+}
+
 function draw(hiddenPlacedSquare = null) {
   boardElement.classList.remove("start-screen");
   window.Makyek.renderBoard({
@@ -77,7 +117,7 @@ function draw(hiddenPlacedSquare = null) {
       }
 
       const result = game.movePiece(from, to);
-      statusElement.textContent = result.message;
+      setStatusText(result.message);
       if (result.ok) {
         await window.Makyek.animateAiMove(boardElement, { from, to }, result.capturedSquares);
       }
@@ -101,9 +141,9 @@ async function handlePlacementDrop(from, to) {
 
   if (from?.source === "reserve") {
     if (!game.canPlaceAt(to)) {
-      statusElement.textContent = game.board[to.row]?.[to.col] === "#"
+      setStatusText(game.board[to.row]?.[to.col] === "#"
         ? "Choose a hotel room."
-        : "That room is occupied.";
+        : "That room is occupied.");
       return;
     }
 
@@ -117,7 +157,7 @@ async function handlePlacementDrop(from, to) {
 
   const animationFromRect = window.Makyek.getBoardPieceRect(boardElement, from);
   const result = game.movePlacedFilip(from, to);
-  statusElement.textContent = result.message;
+  setStatusText(result.message);
 
   if (!result.ok) {
     draw();
@@ -149,7 +189,7 @@ async function handleBoardClick(square) {
   const canPlaceFilip = game.canPlaceAt && game.canPlaceAt(square);
   const animationFromRect = getPlacementAnimationSource(square, wasPlacedFilip, canPlaceFilip);
   const result = game.toggleFilip(square);
-  statusElement.textContent = result.message;
+  setStatusText(result.message);
   draw(canPlaceFilip && result.ok ? square : null);
 
   let placementAnimation = Promise.resolve();
@@ -186,7 +226,7 @@ async function runRegen() {
 
   const result = game.finishRegen();
   regenInProgress = false;
-  statusElement.textContent = result.message;
+  setStatusText(result.message);
 
   if (result.won) {
     levelComplete = true;
@@ -206,7 +246,7 @@ async function undoFailedRegen() {
     ? window.Makyek.getBoardPieceRect(boardElement, lastPlaced)
     : null;
   const result = game.undoLastPlacement();
-  statusElement.textContent = result.message;
+  setStatusText(result.message);
   draw();
 
   if (result.ok) {
@@ -248,7 +288,8 @@ resetButton.addEventListener("click", () => {
   levelComplete = false;
   regenInProgress = false;
   game.reset();
-  statusElement.textContent = game.helpText || placementStatus();
+  setHelpText(game.helpText);
+  setStatusText(placementStatus());
   draw();
 });
 
@@ -291,7 +332,7 @@ function scheduleAiMove() {
     return;
   }
 
-  statusElement.textContent = "Black AI is thinking...";
+  setStatusText("Black AI is thinking...");
   draw();
 
   aiTimer = window.setTimeout(async () => {
@@ -305,9 +346,9 @@ function scheduleAiMove() {
 
     if (!isMoveShape(move)) {
       rememberBlackDebugSnapshot(cloneBoard(game.board), cloneBoard(game.board), aiResult, aiDepth);
-      statusElement.textContent = move
+      setStatusText(move
         ? "Black AI chose an invalid move. Use Black debug to copy the state."
-        : "Black AI has no legal move.";
+        : "Black AI has no legal move.");
       draw();
       return;
     }
@@ -316,7 +357,7 @@ function scheduleAiMove() {
     const boardBeforeMove = cloneBoard(game.board);
     const result = game.movePiece(move.from, move.to);
     rememberBlackDebugSnapshot(boardBeforeMove, cloneBoard(game.board), aiResult, aiDepth);
-    statusElement.textContent = `Black AI: ${result.message}`;
+    setStatusText(`Black AI: ${result.message}`);
     await window.Makyek.animateAiMove(boardElement, move, result.capturedSquares);
 
     if (result.ok && completeLevelIfNoGoblinsRemain()) {
@@ -350,17 +391,17 @@ function schedulePondering() {
   const runId = ponderRunId;
   const maxDepth = Number(ponderDepthSelect.value);
 
-  statusElement.textContent = `Thinking for White to depth ${maxDepth}...`;
+  setStatusText(`Thinking for White to depth ${maxDepth}...`);
 
   if (!window.Worker) {
-    statusElement.textContent = "White thinking needs Web Worker support.";
+    setStatusText("White thinking needs Web Worker support.");
     return;
   }
 
   try {
     ponderWorker = new Worker("src/ponder-worker.js");
   } catch {
-    statusElement.textContent = "White thinking needs this page served by a local web server.";
+    setStatusText("White thinking needs this page served by a local web server.");
     return;
   }
 
@@ -395,7 +436,7 @@ function schedulePondering() {
       score: entry.score,
       isBest: bestMoves.some((move) => sameMove(move, entry.move)),
     }));
-    statusElement.textContent = `White hint depth ${depth}: ${formatMove(result.move || bestMoves[0])} (${formatCount(bestMoves.length)} best). ${formatRate(positionsPerSecond)} positions/s, ${formatCount(cacheHits)} cache hits.`;
+    setStatusText(`White hint depth ${depth}: ${formatMove(result.move || bestMoves[0])} (${formatCount(bestMoves.length)} best). ${formatRate(positionsPerSecond)} positions/s, ${formatCount(cacheHits)} cache hits.`);
     draw();
     renderMoveList(depth);
   });
@@ -405,7 +446,7 @@ function schedulePondering() {
     }
 
     clearPondering();
-    statusElement.textContent = "White thinking worker failed to start.";
+    setStatusText("White thinking worker failed to start.");
     draw();
   });
   ponderWorker.postMessage({
@@ -716,7 +757,7 @@ function completeLevelIfNoGoblinsRemain() {
   levelComplete = true;
   clearAiTimer();
   clearPondering();
-  statusElement.textContent = "Brilliant work.";
+  setStatusText("Brilliant work.");
   showNextLevelScreen();
   return true;
 }
@@ -738,7 +779,8 @@ async function showStartScreen() {
   boardElement.style.setProperty("--board-aspect", "9 / 16");
   boardElement.style.setProperty("--board-fit-ratio", "0.5625");
   boardElement.replaceChildren(createStartButton(0, text));
-  statusElement.textContent = text;
+  setHelpText(text);
+  setStatusText("");
 }
 
 function createStartButton(levelIndex, text) {
@@ -803,7 +845,8 @@ async function showLevelIntroScreen(levelIndex) {
   boardElement.style.setProperty("--board-aspect", "9 / 16");
   boardElement.style.setProperty("--board-fit-ratio", "0.5625");
   boardElement.replaceChildren(createStartButton(levelIndex, text));
-  statusElement.textContent = text;
+  setHelpText(text);
+  setStatusText("");
 }
 
 function createPosterTransitionOverlay(startRect) {
@@ -894,17 +937,20 @@ async function loadSelectedLevel() {
   playAreaElement.classList.remove("start-mode");
   gameHeaderElement.hidden = false;
   controlsElement.hidden = false;
-  statusElement.textContent = "Loading level...";
+  setHelpText("");
+  setStatusText("Loading level...");
 
   try {
     const level = await window.Makyek.loadLevel(levelSelect.value);
     game.reset(level);
     setSelectValue(aiDepthSelect, level.aiDepth || 2);
-    statusElement.textContent = level.helpText || placementStatus();
+    setHelpText(level.helpText);
+    setStatusText(placementStatus());
   } catch (error) {
     game.reset(null);
     setSelectValue(aiDepthSelect, 2);
-    statusElement.textContent = error.message || "Could not load level.";
+    setHelpText("");
+    setStatusText(error.message || "Could not load level.");
   }
 
   draw();

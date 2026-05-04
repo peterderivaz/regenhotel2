@@ -471,7 +471,11 @@ function createPiece(
     if (onMoveStart) {
       onMoveStart();
     }
-    statusElement.textContent = `Dragging ${piece} piece from ${renderSquareLabel(row, col)}.`;
+    if (window.Makyek.setStatusText) {
+      window.Makyek.setStatusText(`Dragging ${piece} piece from ${renderSquareLabel(row, col)}.`);
+    } else {
+      statusElement.textContent = `Dragging ${piece} piece from ${renderSquareLabel(row, col)}.`;
+    }
   });
 
   pieceElement.addEventListener("dragend", () => {
