@@ -1,6 +1,8 @@
 :root {
   color-scheme: light;
-  --board-width: 720px;
+  --shell-padding: 24px;
+  --board-width: calc(100vw - var(--shell-padding) - var(--shell-padding));
+  --header-width: 720px;
   --board-vertical-chrome: 474px;
   --poster-vertical-chrome: 52px;
   --side-panel-width: 280px;
@@ -43,12 +45,12 @@ button {
 .app-shell {
   height: 100dvh;
   display: grid;
-  place-items: center;
-  padding: 24px;
+  place-items: start center;
+  padding: var(--shell-padding);
 }
 
 .game-layout {
-  width: min(96vw, 1040px);
+  width: var(--board-width);
   display: grid;
   justify-items: center;
 }
@@ -58,7 +60,7 @@ button {
 }
 
 .game-header {
-  width: min(100%, var(--board-width));
+  width: min(100%, var(--header-width));
   aspect-ratio: 45 / 16;
   margin-bottom: 16px;
   position: relative;
@@ -116,7 +118,7 @@ button {
 }
 
 .controls {
-  width: min(100%, var(--board-width));
+  width: min(100%, var(--header-width));
   display: flex;
   flex-wrap: wrap;
   align-items: end;
@@ -176,7 +178,7 @@ button {
 }
 
 .debug-output-control textarea {
-  width: min(100%, var(--board-width));
+  width: min(100%, var(--header-width));
   min-height: 180px;
   padding: 10px;
   border: 1px solid rgba(25, 34, 31, 0.24);
@@ -430,7 +432,7 @@ button {
 .play-area {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, var(--board-width)) minmax(220px, var(--side-panel-width));
+  grid-template-columns: minmax(0, 1fr) minmax(220px, var(--side-panel-width));
   justify-content: center;
   align-items: start;
   gap: 16px;
@@ -891,10 +893,13 @@ button {
 
 @media (max-width: 900px) {
   .game-layout,
-  .game-header,
-  .controls,
   .play-area {
     width: min(100%, var(--board-width));
+  }
+
+  .game-header,
+  .controls {
+    width: min(100%, var(--header-width));
   }
 
   .play-area {
@@ -907,9 +912,12 @@ button {
 }
 
 @media (max-width: 520px) {
+  :root {
+    --shell-padding: 16px;
+  }
+
   .app-shell {
     height: 100dvh;
-    padding: 16px;
     place-items: start center;
   }
 
