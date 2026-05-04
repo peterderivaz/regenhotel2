@@ -40,6 +40,8 @@ window.Makyek.renderBoard = function renderBoard({
   const boardCols = Math.min(game.board[0].length, HOTEL_BOARD_COLUMNS.length);
   currentViewport = getBoardViewport(game.board, boardRows, boardCols);
   applyBoardViewport(boardElement, currentViewport);
+  updateBoardTorchSize(boardElement, currentViewport);
+  ensureBoardTorchHandlers(boardElement);
 
   const percolationPreview = game.getFilipPercolationPreview
     ? game.getFilipPercolationPreview()
@@ -940,6 +942,34 @@ function applyBoardViewport(boardElement, viewport) {
   boardElement.style.setProperty("--hotel-bg-height", `${scaleY * 100}%`);
   boardElement.style.setProperty("--hotel-bg-x", `${positionX}%`);
   boardElement.style.setProperty("--hotel-bg-y", `${positionY}%`);
+}
+
+function updateBoardTorchSize(boardElement, viewport) {
+  const boardRect = boardElement.getBoundingClientRect();
+  const roomWidth = boardRect.width * (9.2 / viewport.width);
+  const roomHeight = boardRect.height * (10.5 / viewport.height);
+  const roomSize = Math.max(1, (roomWidth + roomHeight) / 2);
+
+  boardElement.style.setProperty("--torch-clear-radius", `${roomSize * 1.5}px`);
+  boardElement.style.setProperty("--torch-fade-radius", `${roomSize * 2.5}px`);
+}
+
+function ensureBoardTorchHandlers(boardElement) {
+  if (boardElement.dataset.torchHandlers === "true") {
+    return;
+  }
+
+  boardElement.dataset.torchHandlers = "true";
+  boardElement.addEventListener("pointermove", (event) => {
+    const rect = boardElement.getBoundingClientRect();
+
+    boardElement.classList.add("torch-active");
+    boardElement.style.setProperty("--torch-x", `${event.clientX - rect.left}px`);
+    boardElement.style.setProperty("--torch-y", `${event.clientY - rect.top}px`);
+  });
+  boardElement.addEventListener("pointerleave", () => {
+    boardElement.classList.remove("torch-active");
+  });
 }
 
 function viewportCoordinate(coordinate, start, size) {
