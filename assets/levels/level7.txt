@@ -1,9 +1,9 @@
 But goblins also regenerate if two are next to an empty square.
+#...gF##
+#..g..##
+#.gg.F##
+#g..g.##
+#F.F..##
 ########
-##.g.###
-##g..###
-##...###
 ########
-########
-########
-place=3
+place=1

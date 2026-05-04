@@ -17,7 +17,9 @@ window.Makyek.LEVEL_FILES = [
 ];
 
 window.Makyek.loadLevel = async function loadLevel(fileName) {
-  const response = await fetch(`assets/levels/${fileName}`);
+  const response = await fetch(`assets/levels/${fileName}?v=${Date.now()}`, {
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error(`Could not load ${fileName}`);
