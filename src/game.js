@@ -306,6 +306,24 @@ function getPlacementPreviewBoard(board, placedFilips, placeLimit, placement) {
     return previewBoard;
   }
 
+  if (placement.source === "click") {
+    if (previewBoard[to.row][to.col] === "light") {
+      if (!placedFilips.some((placed) => sameSquare(placed, to))) {
+        return null;
+      }
+
+      previewBoard[to.row][to.col] = null;
+      return previewBoard;
+    }
+
+    if (placedFilips.length >= placeLimit || previewBoard[to.row][to.col]) {
+      return null;
+    }
+
+    previewBoard[to.row][to.col] = "light";
+    return previewBoard;
+  }
+
   if (placement.source !== "placed-filip" || !isInsideBoard(placement.from)) {
     return null;
   }
@@ -329,9 +347,19 @@ function getPlacementPreviewBoard(board, placedFilips, placeLimit, placement) {
 
 function getFilipPercolationPreview(board) {
   const previewSquares = new Map();
-  const startingBoard = cloneBoard(board);
   const previewBoard = cloneBoard(board);
   const maxSteps = window.Makyek.BOARD_ROWS * window.Makyek.BOARD_COLS;
+
+  previewBoard.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (cell === "light") {
+        previewSquares.set(squareKey({ row: rowIndex, col: colIndex }), {
+          row: rowIndex,
+          col: colIndex,
+        });
+      }
+    });
+  });
 
   for (let stepIndex = 0; stepIndex < maxSteps; stepIndex += 1) {
     const step = getNextRegenStep(previewBoard);
@@ -343,10 +371,7 @@ function getFilipPercolationPreview(board) {
     step.changes.forEach((change) => {
       previewBoard[change.square.row][change.square.col] = change.to;
 
-      if (
-        change.to === "light" &&
-        startingBoard[change.square.row][change.square.col] !== "light"
-      ) {
+      if (change.to === "light") {
         previewSquares.set(squareKey(change.square), {
           row: change.square.row,
           col: change.square.col,

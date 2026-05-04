@@ -524,12 +524,33 @@ function getPieceImage(piece, isCaptured) {
 }
 
 function addSquareHandlers(square, onMove, inputBlocked, game, onSquareClick) {
+  square.addEventListener("pointerenter", () => {
+    if (inputBlocked || draggedSquare || game.phase !== "placing") {
+      return;
+    }
+
+    clearPercolationPreview(square.parentElement);
+
+    if (previewPercolation(square, game, { source: "click" }) > 0) {
+      square.classList.add("placement-hover-target");
+    }
+  });
+
+  square.addEventListener("pointerleave", () => {
+    square.classList.remove("placement-hover-target");
+
+    if (!draggedSquare) {
+      clearPercolationPreview(square.parentElement);
+    }
+  });
+
   square.addEventListener("dragover", (event) => {
     if (inputBlocked) {
       return;
     }
 
     event.preventDefault();
+    square.classList.remove("placement-hover-target");
     square.classList.add("drop-target");
     clearCapturePreview(square.parentElement);
     clearPercolationPreview(square.parentElement);
@@ -672,7 +693,7 @@ function clearCapturePreview(boardElement) {
 
 function previewPercolation(square, game, from) {
   if (!game.getFilipPercolationPreview || game.phase !== "placing") {
-    return;
+    return 0;
   }
 
   const to = {
@@ -688,6 +709,8 @@ function previewPercolation(square, game, from) {
   previewSquares.forEach((previewSquare) => {
     findSquare(square.parentElement, previewSquare)?.classList.add("percolation-drag-preview-square");
   });
+
+  return previewSquares.length;
 }
 
 function clearPercolationPreview(boardElement) {
@@ -697,6 +720,10 @@ function clearPercolationPreview(boardElement) {
 
   boardElement.querySelectorAll(".percolation-drag-preview-square").forEach((square) => {
     square.classList.remove("percolation-drag-preview-square");
+  });
+
+  boardElement.querySelectorAll(".placement-hover-target").forEach((square) => {
+    square.classList.remove("placement-hover-target");
   });
 }
 

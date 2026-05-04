@@ -554,7 +554,8 @@ button {
   background: rgba(25, 18, 28, 0.4);
 }
 
-.square.drop-target {
+.square.drop-target,
+.square.placement-hover-target {
   border-radius: 8px;
   background: rgba(240, 216, 121, 0.32);
   outline: 2px solid rgba(240, 216, 121, 0.88);
@@ -717,10 +718,7 @@ button {
 }
 
 .piece.light-piece::before {
-  background: rgba(250, 238, 151, 0.64);
-  box-shadow:
-    0 0 12px rgba(250, 238, 151, 0.95),
-    0 0 24px rgba(65, 190, 210, 0.46);
+  display: none;
 }
 
 .piece.dark-piece::before {
