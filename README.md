@@ -2,7 +2,9 @@
 
 A browser-based placement and regeneration puzzle game built with plain HTML, CSS, JavaScript, and image assets.
 
-## Running
+View game at https://peterderivaz.github.io/regenhotel2/
+
+## Running locally
 
 Serve the project directory with a local web server, then open `index.html`.
 White thinking uses a Web Worker, which many browsers block from `file://` pages.
