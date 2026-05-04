@@ -1,0 +1,10 @@
+Filips can also generate across floors of the hotel.
+Place a Filip to fill all rooms.
+########
+########
+## F   #
+##F   F#
+##     #
+##  F  #
+########
+place=1

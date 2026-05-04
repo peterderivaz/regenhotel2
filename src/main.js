@@ -766,7 +766,7 @@ async function showStartScreen() {
   clearAiTimer();
   clearPondering();
   const level = await loadLevelByIndex(0);
-  const text = level.helpText || "";
+  const text = level.introText || level.helpText || "";
 
   levelComplete = false;
   regenInProgress = false;
@@ -831,8 +831,7 @@ async function showNextLevelScreen() {
 
 async function showLevelIntroScreen(levelIndex) {
   const level = await loadLevelByIndex(levelIndex);
-  const prefix = levelIndex === 0 ? "Play again. " : `Level ${levelIndex + 1}. `;
-  const text = `${prefix}${level.helpText || ""}`;
+  const text = level.introText || level.helpText || "";
 
   levelComplete = false;
   regenInProgress = false;

@@ -4,6 +4,8 @@ window.Makyek.LEVEL_FILES = [
   "level1.txt",
   "level2.txt",
   "level3.txt",
+  "level3b.txt",
+  "level3c.txt",
   "level4.txt",
   "level5.txt",
   "level5b.txt",
@@ -29,9 +31,10 @@ window.Makyek.loadLevel = async function loadLevel(fileName) {
 };
 
 window.Makyek.parseLevel = function parseLevel(source, name = "level") {
-  const lines = source
+  const sourceLines = source
     .split(/\r?\n/)
-    .map((line) => line.trimEnd())
+    .map((line) => line.trimEnd());
+  const lines = sourceLines
     .filter((line) => line.trim().length > 0);
   const gridStart = lines.findIndex((line) => isGridLine(line));
 
@@ -39,7 +42,7 @@ window.Makyek.parseLevel = function parseLevel(source, name = "level") {
     throw new Error(`${name} has no grid.`);
   }
 
-  const helpText = lines.slice(0, gridStart).join(" ");
+  const levelText = parseLevelText(sourceLines, lines.slice(0, gridStart));
   const gridLines = lines.slice(gridStart, gridStart + window.Makyek.BOARD_ROWS);
   const settingLines = lines.slice(gridStart + window.Makyek.BOARD_ROWS);
 
@@ -57,13 +60,43 @@ window.Makyek.parseLevel = function parseLevel(source, name = "level") {
 
   return {
     name,
-    helpText,
+    introText: levelText.introText,
+    helpText: levelText.helpText,
     board,
     aiDepth: parseLevelDepth(settingLines, name),
     placeLimit: parsePlaceLimit(settingLines, board),
     darkCanMove: gridLines.some((line) => line.includes("G")),
   };
 };
+
+function parseLevelText(sourceLines, fallbackTextLines) {
+  const firstGridLine = sourceLines.findIndex((line) => isGridLine(line));
+  const textLines = firstGridLine === -1
+    ? fallbackTextLines
+    : sourceLines.slice(0, firstGridLine);
+  const separatorIndex = textLines.findIndex((line) => line.trim().length === 0);
+
+  if (separatorIndex === -1) {
+    const text = joinTextLines(fallbackTextLines);
+
+    return {
+      introText: text,
+      helpText: text,
+    };
+  }
+
+  return {
+    introText: joinTextLines(textLines.slice(0, separatorIndex)),
+    helpText: joinTextLines(textLines.slice(separatorIndex + 1)),
+  };
+}
+
+function joinTextLines(lines) {
+  return lines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join(" ");
+}
 
 function isGridLine(line) {
   return /^[#. FgG]+$/.test(line);

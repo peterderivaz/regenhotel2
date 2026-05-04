@@ -1,9 +1,13 @@
+Well done!
+Only new Filips can be dragged.
+On the next level you do not have enough Filips.
+However, Filips can regenerate into gaps.
+
 Filips can regenerate into gaps.
-Place Filip in the centre so all rooms are filled.
 ########
 ########
 ########
-##F   F#
+##F  F##
 ########
 ########
 ########

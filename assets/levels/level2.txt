@@ -1,3 +1,6 @@
+Well done!
+Filips can be placed by clicking, or by dragging.
+
 Place Filips to fill all the rooms.
 ########
 ## FF###

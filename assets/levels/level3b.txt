@@ -1,0 +1,13 @@
+Well done!
+You need 2 Filips to regenerate a new Filip.
+
+You need 2 Filips to regenerate a new Filip.
+Place Filip in the centre so all rooms are filled.
+########
+########
+########
+##F   F#
+########
+########
+########
+place=1
